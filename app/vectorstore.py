@@ -4,13 +4,14 @@ from langchain_community.vectorstores.upstash import UpstashVectorStore
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
+from pathlib import Path
 
 load_dotenv()
 
 
 # 2. Create Vector Database
 loader = DirectoryLoader(
-    "/Users/lukekosner/Documents/Coding/haeserver/optimized_sources",
+    f"{Path(__file__).parent}/optimized_sources",
     glob="**/*.txt",
     loader_cls=TextLoader,
 )

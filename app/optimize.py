@@ -1,9 +1,10 @@
 import os
 import re
+from pathlib import Path
 
 # Define source and destination directories
-source_dir = "/Users/lukekosner/Documents/Coding/haeserver/sources"
-destination_dir = "/Users/lukekosner/Documents/Coding/haeserver/optimized_sources"
+source_dir = f"{Path(__file__).parent}/sources"
+destination_dir = f"{Path(__file__).parent}/optimized_sources"
 
 # Create destination directory if it does not exist
 os.makedirs(destination_dir, exist_ok=True)

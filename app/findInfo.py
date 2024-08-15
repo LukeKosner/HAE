@@ -1,8 +1,9 @@
 import os
 import json
+from pathlib import Path
 
 # Define the directory and output JSON file
-directory = "/Users/lukekosner/Documents/Coding/haeserver/optimized_sources"
+directory = f"{Path(__file__).parent}/optimized_sources"
 output_file = "output.json"
 
 # Initialize an empty dictionary to store the words and URLs
