@@ -4,6 +4,7 @@ import re
 from fastapi import HTTPException, Request
 from typing_extensions import TypedDict
 from langchain.agents import AgentExecutor
+import time
 from langchain.agents.format_scratchpad.openai_tools import (
     format_to_openai_tool_messages,
 )
@@ -34,10 +35,6 @@ def _is_valid_identifier(value: str) -> bool:
 def create_session_factory(
     base_dir: Union[str, Path],
 ) -> Callable[[str], BaseChatMessageHistory]:
-    base_dir_ = Path(base_dir) if isinstance(base_dir, str) else base_dir
-    if not base_dir_.exists():
-        base_dir_.mkdir(parents=True)
-
     def get_chat_history(
         userId: str, conversationId: str
     ) -> UpstashRedisChatMessageHistory:
@@ -57,13 +54,12 @@ def create_session_factory(
                 "via config. For example, "
                 "chain.invoke(.., {'configurable': {'conversationId': '123'}})"
             )
-        
-       
 
         return UpstashRedisChatMessageHistory(
-            url=os.getenv("UPSTASH_REDIS_CONVERSATIONS_REST_URL"),
-            token=os.getenv("UPSTASH_REDIS_CONVERSATIONS_REST_TOKEN"),
+            url=os.getenv("UPSTASH_REDIS_HISTORY_REST_URL"),
+            token=os.getenv("UPSTASH_REDIS_HISTORY_REST_TOKEN"),
             session_id=conversationId,
+            key_prefix=userId + "/",
         )
 
     return get_chat_history
@@ -124,6 +120,7 @@ model = ChatOpenAI(model="gpt-4o-mini", stream_usage=True)
 tools = [fullDocRetrieverTool, splitDocRetrieverTool]
 
 model_with_tools = model.bind_tools([fullDocRetrieverTool, splitDocRetrieverTool])
+
 
 agent = (
     {

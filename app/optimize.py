@@ -35,7 +35,7 @@ for filename in os.listdir(source_dir):
 
         # get size of modified content
         modified_file_size = len(modified_content)
-        if modified_file_size >= 49152:
+        if modified_file_size >= 40960:
             continue
 
         # Save the modified content to the destination directory
