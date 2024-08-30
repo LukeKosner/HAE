@@ -15,6 +15,8 @@ from langchain_community.chat_message_histories import UpstashRedisChatMessageHi
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.runnables import ConfigurableFieldSpec
 from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_core.tools import tool
+from langchain_core.runnables import RunnableLambda
 from langchain_openai import ChatOpenAI
 from langserve.pydantic_v1 import BaseModel, Field
 from langchain.tools.retriever import create_retriever_tool
@@ -120,6 +122,12 @@ model = ChatOpenAI(model="gpt-4o-mini", stream_usage=True)
 tools = [fullDocRetrieverTool, splitDocRetrieverTool]
 
 model_with_tools = model.bind_tools([fullDocRetrieverTool, splitDocRetrieverTool])
+
+
+def inspect(conversationId):
+    """Print the conversationId and return it."""
+    print(conversationId)
+    return conversationId
 
 
 agent = (

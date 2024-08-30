@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Header, HTTPException, Depends, APIRouter
+from fastapi import FastAPI, Header, HTTPException, Depends, APIRouter, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from langserve import add_routes
@@ -14,6 +14,8 @@ from app.summary import create_summary
 from typing import List
 from pydantic import BaseModel
 import asyncio
+from langserve import APIHandler
+from sse_starlette import EventSourceResponse
 
 
 async def verify_token(Authorization: Annotated[str | None, Header()] = None) -> None:
@@ -33,7 +35,7 @@ async def verify_token(Authorization: Annotated[str | None, Header()] = None) ->
         raise HTTPException(status_code=403, detail=f"Token is invalid: {str(e)}")
 
 
-app = FastAPI(title="Holocaust Answer Engine")
+app = FastAPI(title="Holocaust Answer Engine", version="1.0.5")
 
 authenticated = APIRouter(tags=["private"], dependencies=[Depends(verify_token)])
 
@@ -102,7 +104,23 @@ async def create_summary_route(body: HistoriesRequest):
     return summaries
 
 
-add_routes(app, executer_with_history, path="/agent")
+@authenticated.post(
+    "/chat/stream_events",
+    summary="Stream Chat Events",
+    description="This endpoint handles streaming chat events.",
+    responses={
+        200: {
+            "description": "Stream successfully started.",
+            "content": {"text/event-stream": {"example": "data: message"}},
+        },
+        401: {"description": "Unauthorized access."},
+        500: {"description": "Internal server error."},
+    },
+)
+async def v2_stream(request: Request) -> EventSourceResponse:
+    """Handle stream request."""
+    return await APIHandler(executer_with_history, path="/chat").astream_events(request)
+
 
 app.include_router(authenticated)
 app.include_router(unauthenticated)
